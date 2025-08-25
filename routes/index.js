@@ -3,6 +3,7 @@ import contaRouter from './contaRouter.js';
 import movRouter from './movRouter.js';
 import metasRouter from './metasRouter.js';
 import carteiraInvestRouter from './carteiraInvestRouter.js';
+import authRouter from './authRouter.js';
 import express from 'express';
 
 function Routers(app) {
@@ -13,6 +14,7 @@ function Routers(app) {
     app.use('/mov', movRouter);
     app.use('/metas', metasRouter);
     app.use('/invest', carteiraInvestRouter);
+    app.use('/auth', authRouter);
 }
 
 export default Routers; 
