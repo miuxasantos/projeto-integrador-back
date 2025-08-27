@@ -3,7 +3,7 @@ import db from '../models/index.js';
 const UsuarioController = () =>{
     const Usuario = db.UsuarioModel;
 
-    const createUser = async (req, res, internalCall = false) => {
+    const createUser = async (req, res) => {
         try{
             let info = {
                 nome: req.body.nome,
@@ -15,27 +15,17 @@ const UsuarioController = () =>{
             const usuario = await Usuario.create(info)
             res.status(201).send(usuario);
         } catch(err){
-            if (internalCall) {
-                throw err;
-            }
             res.status(400).json(err.message);
             console.log(err);
+            console.error(err);
         }
     }
 
-    const readAllUsers = async (req, res, internalCall = false) => {
+    const readAllUsers = async (req, res) => {
         try{
             let usuariosInfo = await Usuario.findAll({});
-
-            if (internalCall) {
-                return usuariosInfo; // Retorna para uso interno
-            }
-            
             res.status(200).send(usuariosInfo);
         } catch(err){
-            if (internalCall) {
-                throw err; // Propaga o erro para chamada interna
-            }
             res.status(400).json(err.message);
             console.log(err);
         }
