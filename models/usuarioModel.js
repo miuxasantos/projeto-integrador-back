@@ -13,7 +13,6 @@ export default (sequelize, DataTypes) => {
         nome: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
 
         email: {
@@ -25,12 +24,11 @@ export default (sequelize, DataTypes) => {
         senha: {
             type: DataTypes.STRING(255),
             allowNull: false,
-            unique: false,
         },
 
         tipo: {
             type: DataTypes.STRING(45),
-            defaultValue: 'pessoal,'
+            defaultValue: 'pessoal',
         },
 
         creation: {
@@ -39,17 +37,17 @@ export default (sequelize, DataTypes) => {
             field: 'creation',
         },
 
-        atualização: {
+        atualizacao: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
             field: 'att',
         }
     }, {
         tableName: 'usuarios', // Nome real da tabela no banco
-        timestamps: false, // Desativa os timestamps automáticos
+        timestamps: true, // Desativa os timestamps automáticos
+        createdAt: "creation",
+        updatedAt: "att",
     }
-
-
 );
 
     return UsuarioModel;

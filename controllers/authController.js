@@ -1,8 +1,6 @@
 import db from "../models/index.js";
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = "fav";
-
 const usuarioModel = db.UsuarioModel;
 
 const AuthController = () => {
@@ -10,6 +8,10 @@ const AuthController = () => {
     const signUp = async (req, res) => {
         try {
             const { nome, email, senha, tipo } = req.body;
+
+            if (!nome || !email || !senha) {
+                return res.status(400).json({ error: "Campos obrigatórios faltando." });
+            }
 
             const usuarioExiste = await usuarioModel.findOne({ where: { email }});
 
@@ -20,8 +22,8 @@ const AuthController = () => {
             const novoUsuario = await usuarioModel.create({ nome, email, senha, tipo });
 
             const token = jwt.sign(
-                { id: novoUsuario.idUsuario, email: novoUsuario.email},
-                JWT_SECRET,
+                { id: novoUsuario.idUsuario, email: novoUsuario.email, tipo: novoUsuario.tipo },
+                    process.env.JWT_SECRET,
                 {expiresIn: '24h'}
             );
 
@@ -32,18 +34,24 @@ const AuthController = () => {
                     id: novoUsuario.idUsuario,
                     nome: novoUsuario.nome,
                     email: novoUsuario.email,
-                    tipo: novoUsuario.tipo
+                    tipo: novoUsuario.tipo,
                 }
 
             });
 
         } catch (error) {
+            console.error(error);
+            if (error.name === "SequelizeUniqueConstraintError") {
+                return res.status(400).json({ error: "Email (ou nome) já em uso." });
+            }
             res.status(400).json({error: "Erro ao criar um usuário." + error.message});
         }
     };
 
     const signIn = async (req, res) => {
         try{
+            console.log("REQ BODY:", req.body);
+            console.log("JWT_SECRET:", process.env.JWT_SECRET);
             const {email, senha} = req.body;
 
             const usuario = await usuarioModel.findOne({ where: { email }});
@@ -57,8 +65,8 @@ const AuthController = () => {
             }
 
             const token = jwt.sign(
-                { id: usuario.idUsuario, email: usuario.email },
-                JWT_SECRET,
+                { id: usuario.idUsuario, email: usuario.email, tipo: usuario.tipo },
+                    process.env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
 
@@ -74,6 +82,8 @@ const AuthController = () => {
             });
 
         } catch (error) {
+            console.log(req.body);
+            console.error(error);
             res.status(500).json({ error: 'Erro ao fazer login' });
         }
     };
@@ -86,8 +96,8 @@ const AuthController = () => {
         }
 
         try {
-            const decoded = jwt.verify(token, JWT_SECRET);
-            req.idUsuario = decoded.id;
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
             next();
         } catch (error) {
             res.status(401).json({ error: 'Erro ao decodificar. '});

@@ -9,7 +9,7 @@ const ContaController = () =>{
             let info = {
                 nome: req.body.nome,
                 saldo: req.body.saldo,
-                usuarios_idUsuario: req.body.usuarios_idUsuario,
+                usuarios_idUsuario: req.user.id
             }
 
             const conta = await Conta.create(info)
@@ -22,7 +22,7 @@ const ContaController = () =>{
 
     const readAllAccounts = async (req, res) => {
         try{
-            let contasInfo = await Conta.findAll({})
+            let contasInfo = req.user.tipo === "admin" ? await Conta.findAll({}) : await Conta.findAll({where: { usuarios_idUsuario: req.user.id }})
             res.status(200).send(contasInfo);
         } catch(err){
             res.status(400).json(err.message);
@@ -32,9 +32,7 @@ const ContaController = () =>{
 
     const readById = async (req, res) => {
         try{
-            let id = req.params.id;
-            let contaInfo = await Conta.findOne({where: {idConta: id}});
-            res.status(200).send(contaInfo);
+            res.status(200).send(req.conta);
         } catch(err){
             res.status(400).json(err.message);
             console.log(err);
@@ -43,9 +41,8 @@ const ContaController = () =>{
 
     const updateAccount = async (req, res) => {
         try{
-            let id = req.params.id;
-            const conta = await Conta.update(req.body, {where: {idConta: id}});
-            res.status(200).send(conta);
+            await req.conta.update(req.body);
+            res.status(200).json(req.conta);
         } catch(err){
             res.status(400).json(err.message);
             console.log(err);
@@ -54,8 +51,7 @@ const ContaController = () =>{
 
     const deleteAccount = async (req, res) => {
         try{
-            let id = req.params.id;
-            const conta = await Conta.destroy({where: {idConta: id}});
+            await req.conta.destroy();
             res.status(200).send('Account deleted succesfully!');
         } catch(err){
             res.status(400).json(err.message);

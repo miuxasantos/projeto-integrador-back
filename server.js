@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import Routers from './routes/index.js';
@@ -6,8 +10,7 @@ import EventEmitter from 'events';
 const app = express();
 
 var corOptions = {
-    origin: 'http://localhost:3030',
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:3030', 'http://localhost:5173'],
     credentials: true
 }
 

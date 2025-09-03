@@ -25,7 +25,7 @@ const MovController = () =>{
 
     const readAllMovs = async (req, res) => {
         try{
-            let movsInfo = await Movimentacao.findAll({})
+            let movsInfo = await Movimentacao.findAll({ where: { contas_idConta: req.conta.idConta }})
             res.status(200).send(movsInfo);
         } catch(err){
             res.status(400).json(err.message);
@@ -35,8 +35,13 @@ const MovController = () =>{
 
     const readById = async (req, res) => {
         try{
-            let id = req.params.id;
-            let movInfo = await Movimentacao.findOne({where: {idMov: id}});
+            const { idMov } = req.params;
+            const movInfo = await Movimentacao.findOne({where: {idMov, contas_idConta: req.conta.idConta}});
+
+            if(!movInfo) {
+                return res.status(404).json({error: "Movimentação não encontrada."});
+            }
+
             res.status(200).send(movInfo);
         } catch(err){
             res.status(400).json(err.message);
@@ -46,8 +51,13 @@ const MovController = () =>{
 
     const updateMov = async (req, res) => {
         try{
-            let id = req.params.id;
-            const mov = await Movimentacao.update(req.body, {where: {idMov: id}});
+            const { idMov } = req.params;
+            const mov = await Movimentacao.update(req.body, {where: {idMov, contas_idConta: req.conta.idConta}});
+
+            if(!mov){
+                res.status(404).json({error: "Movimentação não encontrada."});
+            }
+
             res.status(200).send(mov);
         } catch(err){
             res.status(400).json(err.message);
@@ -57,8 +67,14 @@ const MovController = () =>{
 
     const deleteMov = async (req, res) => {
         try{
-            let id = req.params.id;
-            const mov = await Movimentacao.destroy({where: {idMov: id}});
+            const { idMov } = req.params;
+            const mov = await Movimentacao.findOne({where: {idMov, contas_idConta: req.conta.idConta}});
+
+            if(!mov) {
+                return res.status(404).json({error: "Movimentação não encontrada."});
+            }
+
+            await mov.destroy();
             res.status(200).send('Movimentation deleted succesfully!'); 
         } catch(err){
             res.status(400).json(err.message);
